@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import Watchlist,Wishlist, CustomUser, Profile
+from .models import Watchlist, Wishlist, CustomUser, Profile
+
 
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
@@ -14,14 +15,17 @@ class CustomUserAdmin(UserAdmin):
         ('Important Dates', {'fields': ('last_login', 'date_joined')}),
     )
 
+
+admin.site.register(CustomUser, CustomUserAdmin)
+
+
 @admin.register(Profile)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ['user', 'bio']
 
-admin.site.register(CustomUser, CustomUserAdmin)
 
 class WatchlistAdmin(admin.ModelAdmin):
     list_display = ['brand', 'price', 'stock', 'discount']
 
-admin.site.register(Watchlist, WatchlistAdmin)
 
+admin.site.register(Watchlist, WatchlistAdmin)
