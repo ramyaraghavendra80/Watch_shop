@@ -1,0 +1,58 @@
+{% extends "main.html" %} {% block content %}
+<style>
+  /* General styles for the signup form */
+  .signup-form-container {
+    max-width: 400px;
+    margin: 50px auto 0 auto;
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Form heading styles */
+  .signup-form h2 {
+    text-align: center;
+    color: #333;
+  }
+
+  /* Input field and button styles */
+  .signup-form input,
+  .signup-form button {
+    width: 100%;
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ced4da; /* Adding border style */
+    transition: border-color 0.3s, box-shadow 0.3s; /* Smooth transition for focus */
+  }
+
+  /* Input field focus styles */
+  .signup-form input:focus {
+    border-color: #80bdff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+  }
+
+  /* Button styles */
+  .signup-form button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  /* Button hover effect */
+  .signup-form button:hover {
+    background-color: #218838; /* Darker green on hover */
+  }
+</style>
+
+<div class="signup-form-container">
+  <h2>Sign Up</h2>
+  <form method="POST" class="signup-form">
+    {% csrf_token %} {{ form.as_p }}
+    <button type="submit">Sign Up</button>
+  </form>
+</div>
+{% endblock %}

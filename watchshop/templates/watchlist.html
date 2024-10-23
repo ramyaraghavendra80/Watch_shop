@@ -1,0 +1,46 @@
+{% block content %}
+<div class="container mt-5">
+  <h1>Our Watches</h1>
+  <div class="row">
+    {% for watch in watches %}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm">
+        <img
+          src="{{ watch.image.url }}"
+          class="card-img-top"
+          alt="{{ watch.brand }}"
+          style="height: 300px; object-fit: cover"
+          onclick="location.href='{% url 'watchdetail' watch.id %}'"
+        />
+        <div class="card-body">
+          <h5 class="card-title">{{ watch.brand }}</h5>
+          <p class="card-text">{{ watch.description }}</p>
+          <p class="card-text">Rs:{{ watch.price }}</p>
+          <p class="card-text">Only {{ watch.stock }} available</p>
+          <p class="card-text">Grab {{ watch.discount }} % discount</p>
+
+          <!-- Wishlist Button -->
+          <form method="POST" action="{% url 'add_to_wishlist' watch.id %}">
+            {% csrf_token %}
+            <button
+              type="submit"
+              class="btn {% if watch.id in user_wishlist_items %} btn-danger {% else %} btn-outline-danger {% endif %}"
+            >
+              <i class="fas fa-heart"></i>
+              {% if watch.id in user_wishlist_items %} Remove from Wishlist {%
+              else %} Add to Wishlist {% endif %}
+            </button>
+          </form>
+
+          <a
+            href="{% url 'watchdetail' watch.id %}"
+            class="btn btn-primary mt-3"
+            >View Details</a
+          >
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
