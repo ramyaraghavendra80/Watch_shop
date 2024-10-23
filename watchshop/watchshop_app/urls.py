@@ -12,7 +12,7 @@ urlpatterns = [
     path('add_to_wishlist/<int:watch_id>/',
          views.add_to_wishlist, name='add_to_wishlist'),
     path('signup/', views.signup_view, name='signup'),
-    # path('login/', views.login_view, name='login'),
-    # path('logout/', views.logout_view, name='logout'),
+    path('login/', views.login_view, name='login'),
+    path('logout/', views.logout_view, name='logout'),
     path('profile/', views.profile_view, name='profile'),
 ]

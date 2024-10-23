@@ -1,7 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import Watchlist, Wishlist, CustomUser, Profile
-
+from django.contrib.auth.forms import AuthenticationForm
+from django import forms
 
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
@@ -23,6 +24,13 @@ admin.site.register(CustomUser, CustomUserAdmin)
 class ProfileAdmin(admin.ModelAdmin):
     list_display = ['user', 'bio']
 
+class CustomLoginForm(AuthenticationForm):
+    username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Username'}))
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Password'}))
+    
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'password']
 
 class WatchlistAdmin(admin.ModelAdmin):
     list_display = ['brand', 'price', 'stock', 'discount']

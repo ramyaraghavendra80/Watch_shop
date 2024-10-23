@@ -5,6 +5,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import AuthenticationForm
 from .forms import SignupForm, WatchForm, ProfileForm
 from django.contrib.auth import logout
+from django.contrib import messages
 
 # User registration view
 
@@ -44,31 +45,32 @@ def profile_view(request):
 
     return render(request, 'profile.html', {'profile_form': profile_form})
 
-# # Login view
-# def login_view(request):
-#     if request.method == 'POST':
-#         form = AuthenticationForm(data=request.POST)
-#         if form.is_valid():
-#             user = form.get_user()
-#             login(request, user)
-#             return redirect('home')
-#     else:
-#         form = AuthenticationForm()
-#     return render(request, 'users/login.html', {'form': form})
 
-# # Logout view
+def login_view(request):
+    if request.method == 'POST':
+        form = CustomLoginForm(request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=password)
+            if user is not None:
+                login(request, user)
+                messages.success(request, f'Welcome back, {username}!')
+                # Redirect to home page after successful login
+                return redirect('home')
+            else:
+                messages.error(request, 'Invalid username or password.')
+        else:
+            messages.error(request, 'Invalid username or password.')
+    else:
+        form = CustomLoginForm()
+
+    return render(request, 'login.html', {'form': form})
 
 
-# def logout_view(request):
-#     logout(request)
-#     return redirect('home')
-
-# # User profile view
-
-
-# @login_required
-# def profile(request):
-#     return render(request, 'users/profile.html')
+def logout_view(request):
+    logout(request)
+    return redirect('home')
 
 
 def Home(request):
