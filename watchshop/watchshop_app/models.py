@@ -1,19 +1,30 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.conf import settings
+from django.core.exceptions import ValidationError
+
+# Custom user model
+# new_admin_username, your_secure_password
 
 
 class CustomUser(AbstractUser):
-    email = models.EmailField(unique=True)  # Email field as unique identifier
+    email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
 
     def __str__(self):
         return self.username
 
+# Profile model associated with CustomUser
+
 
 class Profile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     bio = models.TextField(blank=True)
     profile_pic = models.ImageField(upload_to='profile_pics/', blank=True)
+    fullname = models.CharField(max_length=100, blank=True)
+    dob = models.DateField(null=True, blank=True)
+    phone_number = models.CharField(max_length=15, blank=True)
 
     def __str__(self):
         return self.user.username
@@ -23,7 +34,7 @@ class Watchlist(models.Model):
     brand = models.CharField(max_length=255)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    image = models.ImageField(upload_to='watches/')
+    image = models.ImageField(upload_to='static\watchshop_app\watches')
     stock = models.IntegerField(default=0)
     available = models.BooleanField(default=True)
     discount = models.DecimalField(
@@ -34,42 +45,39 @@ class Watchlist(models.Model):
 
 
 class Wishlist(models.Model):
-    # user = models.OneToOneField(User, on_delete=models.CASCADE)
-    watches = models.ManyToManyField(Watchlist, related_name='wishlists')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    watch = models.ForeignKey(Watchlist, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.user.username}'s Wishlist"
+        return f"{self.user.username}'s Wishlist - {self.watch.brand}"
 
-# class Order(models.Model):
-#     user = models.Fore
-# ignKey(User, on_delete=models.CASCADE)
-#     watches = models.ManyToManyField(Watch, through='OrderItem')
-#     total_price = models.DecimalField(max_digits=10, decimal_places=2)
-#     created_at = models.DateTimeField(auto_now_add=True)
 
-#     def __str__(self):
-#         return f"Order #{self.id} by {self.user.username}"
+class Cart(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
+    watch = models.ForeignKey(Watchlist, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField(default=1)
 
-# class OrderItem(models.Model):
-#     order = models.ForeignKey(Order, on_delete=models.CASCADE)
-#     watch = models.ForeignKey(Watch, on_delete=models.CASCADE)
-#     quantity = models.IntegerField(default=1)
-#     price = models.DecimalField(max_digits=10, decimal_places=2)
+    def __str__(self):
+        return f"{self.user.username}'s Cart - {self.watch.brand}"
 
-#     def __str__(self):
-#         return f"{self.watch.name} in order #{self.order.id}"
 
-# class Cart(models.Model):
-#     user = models.ForeignKey(User, on_delete=models.CASCADE)
-#     created_at = models.DateTimeField(auto_now_add=True)
+class Review(models.Model):
+    watch = models.ForeignKey(
+        'Watchlist', related_name='reviews', on_delete=models.CASCADE
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE
+    )
+    rating = models.PositiveIntegerField(default=1)
+    review_text = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-#     def __str__(self):
-#         return f"Cart of {self.user.username}"
+    def clean(self):
+        # Only check for user and watch if they are already assigned
+        if hasattr(self, 'user') and hasattr(self, 'watch'):
+            if Review.objects.filter(user=self.user, watch=self.watch).exists():
+                raise ValidationError("You have already reviewed this watch.")
 
-# class CartItem(models.Model):
-#     cart = models.ForeignKey(Cart, on_delete=models.CASCADE)
-#     watch = models.ForeignKey(Watch, on_delete=models.CASCADE)
-#     quantity = models.IntegerField(default=1)
-
-#     def __str__(self):
-#         return f"{self.quantity}x {self.watch.name} in {self.cart.user.username}'s cart"
+    def __str__(self):
+        return f"{self.user.username} - {self.watch.brand} ({self.rating} stars)"

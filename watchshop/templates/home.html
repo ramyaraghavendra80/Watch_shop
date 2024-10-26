@@ -1,22 +1,36 @@
-{% extends "main.html" %} {% block content %} {% load static %}
-<div style="padding: 40px; text-align: center; background-color: #f8f9fa">
-  <h1 style="font-size: 36px; color: #343a40">Welcome to Watch Gallaxy</h1>
+{% extends "main.html" %} {% block content %}
+<!-- Greeting Section for Authenticated Users -->
+{% if user.is_authenticated %}
+<div style="text-align: center; padding: 20px 20px 10px 20px">
+  <h2 style="color: #28a745">
+    Welcome back, {{ user.username }} to Watch Gallaxy!
+  </h2>
+</div>
+{% endif %}
+
+<div
+  style="
+    padding: 10px 40px 20px 40px;
+    text-align: center;
+    background-color: #f8f9fa;
+  "
+>
   <p style="font-size: 20px; color: #6c757d; max-width: 800px; margin: 0 auto">
     Discover the best deals, exciting offers, and a world of possibilities
     tailored just for you. Our collection is handpicked to offer quality, style,
     and unbeatable prices. <br />
-    <span style="color: #28a745; font-weight: bold"
-      >Start shopping now and be the first to experience something
-      extraordinary!</span
-    >
+    <span style="color: #28a745; font-weight: bold">
+      Start shopping now and be the first to experience something extraordinary!
+    </span>
   </p>
 </div>
-<!--carousel section-->
+
+<!-- Carousel Section -->
 <div id="carouselExampleRide" class="carousel slide" data-bs-ride="true">
   <div class="carousel-inner">
     <div class="carousel-item active">
       <img
-        src="{% static 'watchshop_app/images/image1.jpg' %}"
+        src="media/watches/image1.jpg"
         class="d-block w-100"
         alt="First slide"
         style="height: 400px; object-fit: cover"
@@ -24,7 +38,7 @@
     </div>
     <div class="carousel-item">
       <img
-        src="{% static 'watchshop_app/images/image2.jpg' %}"
+        src="media/watches/image2.jpg"
         class="d-block w-100"
         alt="Second slide"
         style="height: 400px; object-fit: cover"
@@ -32,7 +46,7 @@
     </div>
     <div class="carousel-item">
       <img
-        src="{% static 'watchshop_app/images/image3.jpg' %}"
+        src="media/watches/image3.jpg"
         class="d-block w-100"
         alt="Third slide"
         style="height: 400px; object-fit: cover"
@@ -59,7 +73,7 @@
   </button>
 </div>
 
-<!--offer section-->
+<!-- Offer Section -->
 <div
   style="
     font-size: 24px;
@@ -74,10 +88,11 @@
   Enjoy a <span style="color: #28a745">massive 50% discount</span> on every
   order—don't miss out on this unbeatable offer!
 </div>
-<!--card section -->
+
+<!-- Card Section -->
 <div>{% include "watchlist.html" with watches=watches %}</div>
 
-<!--footer section-->
+<!-- Footer Section -->
 <footer
   style="
     background-color: #343a40;

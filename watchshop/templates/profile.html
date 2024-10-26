@@ -1,15 +1,124 @@
-{% extends "main.html" %} {% block content %}
+{% extends "main.html" %} 
+{% block content %}
+<!-- Custom Styling for the Profile Page -->
+<style>
+  .container {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    padding: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  h2 {
+    color: #007bff;
+    font-weight: bold;
+    margin-bottom: 20px;
+  }
+
+  h4 {
+    color: #343a40;
+    font-weight: bold;
+    margin-bottom: 15px;
+  }
+
+  .form-control {
+    border: 1px solid #ced4da;
+    padding: 10px;
+    border-radius: 4px;
+  }
+
+  .btn {
+    background-color: #28a745;
+    color: white;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+  }
+
+  .btn:hover {
+    background-color: #218838;
+  }
+
+  .profile-pic-container {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .profile-pic {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #007bff;
+  }
+
+  .hidden {
+    display: none;
+  }
+</style>
+
 <div class="container mt-4">
   <h2>Your Profile</h2>
-  <form method="POST" enctype="multipart/form-data">
-    {% csrf_token %}
+  
+  <!-- Profile Display Section -->
+  <div class="profile-info {% if form_display %}hidden{% endif %}">
     <div class="row">
       <div class="col-md-6">
         <h4>Profile Info</h4>
-        {{ profile_form.as_p }}
+        <p><strong>Full Name:</strong> {{ profile.fullname|default:"Not provided" }}</p>
+        <p><strong>Date of Birth:</strong> {{ profile.dob|default:"Not provided" }}</p>
+        <p><strong>Phone Number:</strong> {{ profile.phone_number|default:"Not provided" }}</p>
+        <p><strong>Bio:</strong> {{ profile.bio|default:"No bio available" }}</p>
+      </div>
+      <div class="col-md-6">
+        <h4>Profile Picture</h4>
+        <div class="profile-pic-container">
+          {% if profile.profile_pic %}
+            <img src="{{ profile.profile_pic.url }}" alt="Profile Picture" class="profile-pic" />
+          {% else %}
+            <img src="https://ui-avatars.com/api/?name={{ user.username|first|upper }}&size=150&background=007bff&color=fff&rounded=true" alt="{{ user.username }}'s Avatar" class="profile-pic" />
+          {% endif %}
+        </div>
       </div>
     </div>
-    <button class="btn btn-primary mt-3" type="submit">Update Profile</button>
-  </form>
+    
+    <button class="btn btn-primary mt-3" onclick="document.querySelector('.profile-info').classList.add('hidden'); document.querySelector('.edit-form').classList.remove('hidden')">Update Personal Info</button>
+  </div>
+  
+  <!-- Profile Edit Form -->
+  <div class="edit-form {% if not form_display %}hidden{% endif %}">
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row">
+        <div class="col-md-6">
+          <h4>Profile Info</h4>
+          {{ profile_form.fullname.label_tag }}
+          <input type="text" name="fullname" class="form-control" value="{{ profile_form.fullname.value }}" placeholder="Full Name" />
+
+          {{ profile_form.dob.label_tag }}
+          <input type="date" name="dob" class="form-control" value="{{ profile_form.dob.value }}" placeholder="Date of Birth" />
+
+          {{ profile_form.phone_number.label_tag }}
+          <input type="tel" name="phone_number" class="form-control" value="{{ profile_form.phone_number.value }}" placeholder="Phone Number" />
+
+          {{ profile_form.bio.label_tag }}
+          <textarea name="bio" class="form-control" placeholder="Enter bio">{{ profile_form.bio.value }}</textarea>
+        </div>
+        <div class="col-md-6">
+          <h4>Profile Picture</h4>
+          <div class="profile-pic-container">
+            {% if profile_form.instance.profile_pic %}
+              <img src="{{ profile_form.instance.profile_pic.url }}" alt="Profile Picture" class="profile-pic" />
+            {% else %}
+              <img src="https://ui-avatars.com/api/?name={{ user.username|first|upper }}&size=150&background=007bff&color=fff&rounded=true" alt="{{ user.username }}'s Avatar" class="profile-pic" />
+            {% endif %}
+          </div>
+          <input type="file" name="profile_pic" class="form-control mt-3" />
+        </div>
+      </div>
+
+      <button class="btn btn-primary mt-3" type="submit">Save Changes</button>
+    </form>
+  </div>
 </div>
 {% endblock %}

@@ -1,0 +1,42 @@
+{% extends "main.html" %} {% block content %}
+<div class="container mt-5">
+  <h1>Your Cart</h1>
+  <div class="row">
+    {% if cart_items %} {% for item in cart_items %}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm">
+        <img src="{{ item.watch.image.url }}" class="card-img-top" alt="{{ item.watch.brand }}" style="height: 300px; width: 100%; object-fit: contain" />
+        <div class="card-body">
+          <h5 class="card-title">{{ item.watch.brand }}</h5>
+          <p class="card-text">{{ item.watch.description }}</p>
+          <p class="card-text">Rs: {{ item.watch.price }}</p>
+          <form method="POST" action="{% url 'update_cart' item.id %}">
+            {% csrf_token %}
+            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" required />
+            <button type="submit" class="btn btn-secondary">Update Quantity</button>
+          </form>
+          <form method="POST" action="{% url 'remove_from_cart' item.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">Remove from Cart</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    {% endfor %} {% else %}
+    <p>Your cart is empty.</p>
+    {% endif %}
+  </div>
+  {%if cart_items%}
+  <div class="mt-4 d-flex justify-content-between align-items-center">
+    <h3 style="font-size: 1.5rem; font-weight: bold; color: #333">
+      Total items:
+      <span style="background-color: #6c757d; color: white; padding: 5px 10px; border-radius: 5px">{{ total_items_count }}</span>
+    </h3>
+    <h3 style="font-size: 1.5rem; font-weight: bold; color: #333">
+      Total Price:
+      <span style="background-color: #28a745; color: white; padding: 5px 10px; border-radius: 5px">Rs {{ total_price }}</span>
+    </h3>
+  </div>
+  {%endif%}
+</div>
+{% endblock %}

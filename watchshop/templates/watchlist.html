@@ -1,4 +1,4 @@
-{% block content %}
+{% extends "main.html" %} {% block content %}
 <div class="container mt-5">
   <h1>Our Watches</h1>
   <div class="row">
@@ -9,34 +9,35 @@
           src="{{ watch.image.url }}"
           class="card-img-top"
           alt="{{ watch.brand }}"
-          style="height: 300px; object-fit: cover"
+          style="height: 300px; width: 100%; object-fit: contain"
           onclick="location.href='{% url 'watchdetail' watch.id %}'"
         />
         <div class="card-body">
           <h5 class="card-title">{{ watch.brand }}</h5>
           <p class="card-text">{{ watch.description }}</p>
-          <p class="card-text">Rs:{{ watch.price }}</p>
+          <p class="card-text">Rs: {{ watch.price }}</p>
           <p class="card-text">Only {{ watch.stock }} available</p>
           <p class="card-text">Grab {{ watch.discount }} % discount</p>
 
-          <!-- Wishlist Button -->
-          <form method="POST" action="{% url 'add_to_wishlist' watch.id %}">
-            {% csrf_token %}
-            <button
-              type="submit"
-              class="btn {% if watch.id in user_wishlist_items %} btn-danger {% else %} btn-outline-danger {% endif %}"
-            >
-              <i class="fas fa-heart"></i>
-              {% if watch.id in user_wishlist_items %} Remove from Wishlist {%
-              else %} Add to Wishlist {% endif %}
-            </button>
-          </form>
+          <!-- Buttons Container -->
+          <div class="d-flex justify-content-between">
+            <form method="POST" action="{% url 'add_to_wishlist' watch.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn {% if watch.id in user_wishlist_items %} btn-danger {% else %} btn-outline-danger {% endif %}">
+                <i class="fas fa-heart"></i>
+                {% if watch.id in user_wishlist_items %} Remove from Wishlist {% else %} Add to Wishlist {% endif %}
+              </button>
+            </form>
+            <form method="POST" action="{% url 'add_to_cart' watch.id %}" class="cart-form">
+              {% csrf_token %}
+              <button type="submit" class="btn {% if watch.id in user_cart_items %} btn-success {% else %} btn-outline-success {% endif %}">
+                <i class="fas fa-shopping-cart"></i>
+                {% if watch.id in user_cart_items %} Remove from Cart {% else %} Add to Cart {% endif %}
+              </button>
+            </form>
+          </div>
 
-          <a
-            href="{% url 'watchdetail' watch.id %}"
-            class="btn btn-primary mt-3"
-            >View Details</a
-          >
+          <a href="{% url 'watchdetail' watch.id %}" class="btn btn-primary mt-3">View Details</a>
         </div>
       </div>
     </div>

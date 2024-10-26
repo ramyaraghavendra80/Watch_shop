@@ -1,30 +1,43 @@
 from django import forms
-from django.contrib.auth.models import User
-from .models import Watchlist, CustomUser, Profile
-from django.contrib.auth.forms import UserCreationForm
-
-
-class CustomUserCreationForm(UserCreationForm):
-    email = forms.EmailField(required=True)
-
-    class Meta:
-        model = CustomUser
-        fields = ('username', 'email', 'phone_number',
-                  'password1', 'password2')
+from .models import Watchlist, CustomUser, Profile, Review
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 
 class SignupForm(UserCreationForm):
     email = forms.EmailField(required=True)
 
+    ROLE_CHOICES = (
+        ('user', 'User'),
+        ('admin', 'Admin'),
+    )
+    role = forms.ChoiceField(choices=ROLE_CHOICES,
+                             widget=forms.RadioSelect, required=True)
+
     class Meta:
-        model = User
-        fields = ['username', 'email', 'password1', 'password2']
+        model = CustomUser  # Ensure this is the correct user model
+        fields = ['username', 'email', 'password1', 'password2', 'role']
+
+    def clean_role(self):
+        role = self.cleaned_data.get('role')
+        if role not in dict(self.ROLE_CHOICES):
+            raise forms.ValidationError("Invalid role selected.")
+        return role
+
+
+class CustomLoginForm(AuthenticationForm):
+    username = forms.CharField(widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'Username'}))
+    password = forms.CharField(widget=forms.PasswordInput(
+        attrs={'class': 'form-control', 'placeholder': 'Password'}))
+
+    class Meta:
+        fields = ['username', 'password']
 
 
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
-        fields = ['bio', 'profile_pic']
+        fields = ['fullname', 'dob', 'phone_number', 'bio', 'profile_pic']
 
 
 class WatchForm(forms.ModelForm):
@@ -39,4 +52,13 @@ class WatchForm(forms.ModelForm):
             'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'stock': forms.NumberInput(attrs={'class': 'form-control'}),
             'discount': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
+
+class ReviewForm(forms.ModelForm):
+    class Meta:
+        model = Review
+        fields = ['rating', 'review_text']
+        widgets = {
+            'rating': forms.RadioSelect(choices=[(i, str(i)) for i in range(1, 6)]),
+            'review_text': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
