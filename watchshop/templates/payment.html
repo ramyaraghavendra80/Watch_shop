@@ -1,0 +1,35 @@
+{% extends "main.html" %}
+{% block content %}
+<div class="container mt-5">
+  <h1 class="text-center">Payment Options</h1>
+  <div class="row">
+    <div class="col-md-8 mx-auto">
+      <form method="POST" action="{% url 'payment_success' %}">
+        {% csrf_token %}
+        <div class="mb-4">
+          <label for="address" class="form-label">Delivery Address</label>
+          <textarea name="address" id="address" class="form-control" rows="3" required placeholder="Enter your delivery address"></textarea>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Choose Payment Method</label>
+          <div class="form-check">
+            <input type="radio" class="form-check-input" name="payment_method" id="upi" value="UPI" required>
+            <label class="form-check-label" for="upi">UPI</label>
+          </div>
+          <div class="form-check">
+            <input type="radio" class="form-check-input" name="payment_method" id="card" value="Card">
+            <label class="form-check-label" for="card">Debit/Credit Card</label>
+          </div>
+          <div class="form-check">
+            <input type="radio" class="form-check-input" name="payment_method" id="cod" value="COD">
+            <label class="form-check-label" for="cod">Cash on Delivery</label>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Place Order</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

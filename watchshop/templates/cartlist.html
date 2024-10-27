@@ -1,42 +1,100 @@
 {% extends "main.html" %} {% block content %}
 <div class="container mt-5">
-  <h1>Your Cart</h1>
+  <h1 class="text-center">Your Cart</h1>
   <div class="row">
-    {% if cart_items %} {% for item in cart_items %}
-    <div class="col-md-4 mb-4">
-      <div class="card h-100 shadow-sm">
-        <img src="{{ item.watch.image.url }}" class="card-img-top" alt="{{ item.watch.brand }}" style="height: 300px; width: 100%; object-fit: contain" />
-        <div class="card-body">
-          <h5 class="card-title">{{ item.watch.brand }}</h5>
-          <p class="card-text">{{ item.watch.description }}</p>
-          <p class="card-text">Rs: {{ item.watch.price }}</p>
-          <form method="POST" action="{% url 'update_cart' item.id %}">
-            {% csrf_token %}
-            <input type="number" name="quantity" value="{{ item.quantity }}" min="1" required />
-            <button type="submit" class="btn btn-secondary">Update Quantity</button>
-          </form>
-          <form method="POST" action="{% url 'remove_from_cart' item.id %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">Remove from Cart</button>
-          </form>
+    <!-- Cart Items Section -->
+    <div class="col-md-8">
+      <div class="row">
+        {% if cart_items %} {% for item in cart_items %}
+        <div class="col-12 mb-3">
+          <div class="card h-100 shadow-sm cart-item-card">
+            <div class="row align-items-center">
+              <!-- Image Section -->
+              <div class="col-3 text-center">
+                <img src="{{ item.watch.image.url }}" alt="{{ item.watch.brand }}" class="cart-item-image" />
+              </div>
+
+              <!-- Description Section -->
+              <div class="col-5">
+                <h5 class="card-title mb-1">{{ item.watch.brand }}</h5>
+                <p class="small mb-1">{{ item.watch.description }}</p>
+
+                <!-- Original Price and Discount Display -->
+                <p class="small text-muted">Original Price: Rs {{ item.watch.price }}</p>
+                {% if item.watch.discount > 0 %}
+                <p class="small text-muted">Discount: {{ item.watch.discount }}%</p>
+                <p class="text-primary">Discounted Price: Rs {{ item.discounted_price|floatformat:2 }}</p>
+                {% else %}
+                <p class="text-primary">Price: Rs {{ item.watch.price }}</p>
+                {% endif %}
+
+                <!-- Total price for this item (discounted price * quantity) -->
+                <p class="text-secondary">Total for {{ item.quantity }} pcs: Rs {{ item.total_item_price|floatformat:2 }}</p>
+              </div>
+
+              <!-- Quantity and Buttons Section -->
+              <div class="col-4 text-end">
+                <form method="POST" action="{% url 'update_cart' item.id %}" class="d-inline">
+                  {% csrf_token %}
+                  <div class="input-group input-group-sm mb-2">
+                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="form-control quantity-input" />
+                    <button type="submit" class="btn btn-sm btn-secondary">Update</button>
+                  </div>
+                </form>
+                <form method="POST" action="{% url 'remove_from_cart' item.id %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                </form>
+              </div>
+            </div>
+          </div>
         </div>
+        {% endfor %} {% else %}
+        <p class="text-center">Your cart is empty.</p>
+        {% endif %}
       </div>
     </div>
-    {% endfor %} {% else %}
-    <p>Your cart is empty.</p>
-    {% endif %}
+
+    <!-- Summary Section -->
+    <div class="col-md-4">
+      {% if cart_items %}
+      <div class="card p-3 shadow-sm">
+        <h3 class="text-center mb-3">Order Summary</h3>
+        <p>Total items: <strong>{{ total_items_count }}</strong></p>
+        <p>Total Price (After Discounts): <strong>Rs {{ total_price|floatformat:2 }}</strong></p>
+        <form action="{% url 'payment_page' %}" method="get">
+          <button type="submit" class="btn btn-success w-100 mt-3">Proceed to Payment</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
   </div>
-  {%if cart_items%}
-  <div class="mt-4 d-flex justify-content-between align-items-center">
-    <h3 style="font-size: 1.5rem; font-weight: bold; color: #333">
-      Total items:
-      <span style="background-color: #6c757d; color: white; padding: 5px 10px; border-radius: 5px">{{ total_items_count }}</span>
-    </h3>
-    <h3 style="font-size: 1.5rem; font-weight: bold; color: #333">
-      Total Price:
-      <span style="background-color: #28a745; color: white; padding: 5px 10px; border-radius: 5px">Rs {{ total_price }}</span>
-    </h3>
-  </div>
-  {%endif%}
 </div>
+
+<style>
+  /* Styling for the Cart Item Card */
+  .cart-item-card {
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+  }
+
+  /* Image Styling */
+  .cart-item-image {
+    max-height: 100px;
+    width: auto;
+    object-fit: contain;
+  }
+
+  /* Layout Adjustments */
+  .quantity-input {
+    width: 60px;
+  }
+
+  /* Button Adjustments */
+  .btn-sm {
+    padding: 4px 8px;
+    font-size: 0.875rem;
+  }
+</style>
 {% endblock %}

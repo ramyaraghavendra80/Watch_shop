@@ -22,18 +22,18 @@
           <!-- Buttons Container -->
           <div class="d-flex justify-content-between">
             <form method="POST" action="{% url 'add_to_wishlist' watch.id %}">
-              {% csrf_token %}
-              <button type="submit" class="btn {% if watch.id in user_wishlist_items %} btn-danger {% else %} btn-outline-danger {% endif %}">
-                <i class="fas fa-heart"></i>
-                {% if watch.id in user_wishlist_items %} Remove from Wishlist {% else %} Add to Wishlist {% endif %}
-              </button>
+              {% csrf_token %} {% if watch.id in user_wishlist_items %}
+              <button class="btn btn-danger">Remove from Wishlist</button>
+              {% else %}
+              <button class="btn btn-outline-danger">Add to Wishlist</button>
+              {% endif %}
             </form>
             <form method="POST" action="{% url 'add_to_cart' watch.id %}" class="cart-form">
-              {% csrf_token %}
-              <button type="submit" class="btn {% if watch.id in user_cart_items %} btn-success {% else %} btn-outline-success {% endif %}">
-                <i class="fas fa-shopping-cart"></i>
-                {% if watch.id in user_cart_items %} Remove from Cart {% else %} Add to Cart {% endif %}
-              </button>
+              {% csrf_token %} {% if watch.id in user_cart_items %}
+              <a href="{% url 'cartlist' %}" class="btn btn-success">Go to Cart</a>
+              {% else %}
+              <button type="submit" class="btn btn-outline-success">Add to Cart</button>
+              {% endif %}
             </form>
           </div>
 

@@ -1,14 +1,14 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Watchlist, Wishlist, Cart, Review  # Import the Watch model
+from .models import Watchlist, Wishlist, Cart, Review, Profile
 from django.contrib.auth.decorators import login_required
+from .decorators import admin_required
 from django.contrib.auth import login, authenticate
 from .forms import SignupForm, WatchForm, ProfileForm, CustomLoginForm, ReviewForm
 from django.contrib.auth import logout
 from django.contrib import messages
 from django.contrib.auth.models import Group
-
-
-# User registration view
+from django.http import JsonResponse
+from django.db.models import Q
 
 
 def signup_view(request):
@@ -17,14 +17,13 @@ def signup_view(request):
         profile_form = ProfileForm(request.POST, request.FILES)
 
         if form.is_valid() and profile_form.is_valid():
-            # Save user first
             user = form.save(commit=False)
-            role = form.cleaned_data.get('role')  # Get the role from the form
+            role = form.cleaned_data.get('role')
 
             if role == 'admin':
                 user.is_staff = True
-                user.is_superuser = True  # Assign admin rights
-            user.save()  # Save the user object
+                user.is_superuser = True
+            user.save()
 
             # Assign user to appropriate group
             if role == 'user':
@@ -102,14 +101,26 @@ def login_view(request):
     return render(request, 'login.html', {'form': form})
 
 
+# @login_required
 def logout_view(request):
     logout(request)
     return redirect('home')
 
 
 def Home(request):
-    watches = Watchlist.objects.all()  # Fetch all watches
-    return render(request, 'home.html', {'watches': watches})
+    # Check if the user is authenticated before accessing their cart
+    user_cart_items = []
+    if request.user.is_authenticated:
+        user_cart_items = Cart.objects.filter(
+            user=request.user).values_list('watch_id', flat=True)
+
+    # Fetch all watches
+    watches = Watchlist.objects.all()  # Or any filtering you want
+    context = {
+        'watches': watches,
+        'user_cart_items': user_cart_items,
+    }
+    return render(request, 'home.html', context)
 
 
 def watchlist_view(request):
@@ -128,6 +139,8 @@ def Navbar(request):
 def Watchdetail(request, watch_id):
     watch_detail = get_object_or_404(Watchlist, id=watch_id)
     reviews = watch_detail.reviews.all()
+    user_cart_items = Cart.objects.filter(user=request.user).values_list(
+        'watch_id', flat=True)  # Fetch watch IDs in the user's cart
 
     if request.method == 'POST':
         review_form = ReviewForm(request.POST)
@@ -162,10 +175,14 @@ def Watchdetail(request, watch_id):
         'watch_detail': watch_detail,
         'reviews': reviews,
         'review_form': review_form,
+        'user_cart_items': user_cart_items,
+
     }
     return render(request, 'watchdetails.html', context)
 
 
+@login_required
+@admin_required
 def Add_watch(request):
     if request.method == 'POST':
         form = WatchForm(request.POST, request.FILES)
@@ -195,7 +212,7 @@ def add_to_wishlist(request, watch_id):
     if not created:
         wishlist_item.delete()
 
-    return redirect('watchlist')
+    return redirect('home')
 
 
 # View wishlist
@@ -209,20 +226,22 @@ def wishlist_view(request):
 def add_to_cart(request, watch_id):
     watch = get_object_or_404(Watchlist, id=watch_id)
     cart_item, created = Cart.objects.get_or_create(
-        user=request.user, watch=watch)
+        user=request.user, watch=watch
+    )
 
     if not created:
-        # If the item already exists, just increase the quantity
         cart_item.quantity += 1
         cart_item.save()
 
-    return redirect('watchlist')  # Redirect to the watchlist or cart page
+    return redirect('watchdetail', watch_id=watch_id)
 
 
 @login_required
 def update_cart(request, cart_id):
+    # Get the specific cart item for the user
     cart_item = get_object_or_404(Cart, id=cart_id, user=request.user)
     if request.method == "POST":
+        # Get the new quantity from the form, defaulting to 1 if not provided
         quantity = int(request.POST.get('quantity', 1))
         cart_item.quantity = quantity
         cart_item.save()
@@ -231,6 +250,7 @@ def update_cart(request, cart_id):
 
 @login_required
 def remove_from_cart(request, cart_id):
+    # Get the specific cart item for the user and delete it
     cart_item = get_object_or_404(Cart, id=cart_id, user=request.user)
     cart_item.delete()
     return redirect('cartlist')  # Redirect to the cart page
@@ -239,12 +259,57 @@ def remove_from_cart(request, cart_id):
 @login_required
 def cartlist_view(request):
     cart_items = Cart.objects.filter(user=request.user)
-    total_price = sum(item.watch.price * item.quantity for item in cart_items)
-    total_items_count = sum(item.quantity for item in cart_items)
+    total_price = 0
+    total_items_count = 0
 
+    # Calculate total price with discount for each item in the cart
+    for item in cart_items:
+        original_price = item.watch.price
+        discount = item.watch.discount
+        discounted_price = original_price * (discount / 100)
+        total_item_price = original_price - discounted_price
+        # Calculate total price for this item
+        item.total_item_price = total_item_price * item.quantity
+        # Update overall totals
+        total_price += item.total_item_price
+        total_items_count += item.quantity
+
+        item.discounted_price = discounted_price
     context = {
         'cart_items': cart_items,
         'total_price': total_price,
         'total_items_count': total_items_count,
     }
     return render(request, 'cartlist.html', context)
+
+
+@login_required
+def buy_now(request, watch_id):
+    watch_detail = get_object_or_404(Watchlist, id=watch_id)
+    return render(request, 'buynow.html', {'watch_detail': watch_detail})
+
+
+@login_required
+def payment_page(request):
+    return render(request, 'payment.html')
+
+
+@login_required
+def payment_success(request):
+    messages.success(request, "Order placed successfully!")
+    return render(request, 'paymentsuccess.html')
+
+
+def search_view(request):
+    if request.method == 'GET':
+        query = request.GET.get('q', '')
+        results = Watchlist.objects.filter(
+            Q(brand__icontains=query) |
+            Q(description__icontains=query) |
+            Q(price__icontains=query)
+        )
+        results_data = [{'id': watch.id, 'title': watch.brand,
+                         'price': watch.price} for watch in results]
+        return JsonResponse(results_data, safe=False)
+
+    return JsonResponse([], safe=False)

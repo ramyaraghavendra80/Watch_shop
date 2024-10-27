@@ -2,26 +2,14 @@
 <!-- Greeting Section for Authenticated Users -->
 {% if user.is_authenticated %}
 <div style="text-align: center; padding: 20px 20px 10px 20px">
-  <h2 style="color: #28a745">
-    Welcome back, {{ user.username }} to Watch Gallaxy!
-  </h2>
+  <h2 style="color: #28a745">Welcome back, {{ user.username }} to Watch Gallaxy!</h2>
 </div>
 {% endif %}
 
-<div
-  style="
-    padding: 10px 40px 20px 40px;
-    text-align: center;
-    background-color: #f8f9fa;
-  "
->
+<div style="padding: 10px 40px 20px 40px; text-align: center; background-color: #f8f9fa">
   <p style="font-size: 20px; color: #6c757d; max-width: 800px; margin: 0 auto">
-    Discover the best deals, exciting offers, and a world of possibilities
-    tailored just for you. Our collection is handpicked to offer quality, style,
-    and unbeatable prices. <br />
-    <span style="color: #28a745; font-weight: bold">
-      Start shopping now and be the first to experience something extraordinary!
-    </span>
+    Discover the best deals, exciting offers, and a world of possibilities tailored just for you. Our collection is handpicked to offer quality, style, and unbeatable prices. <br />
+    <span style="color: #28a745; font-weight: bold"> Start shopping now and be the first to experience something extraordinary! </span>
   </p>
 </div>
 
@@ -29,107 +17,92 @@
 <div id="carouselExampleRide" class="carousel slide" data-bs-ride="true">
   <div class="carousel-inner">
     <div class="carousel-item active">
-      <img
-        src="media/watches/image1.jpg"
-        class="d-block w-100"
-        alt="First slide"
-        style="height: 400px; object-fit: cover"
-      />
+      <img src="media/watches/image1.jpg" class="d-block w-100" alt="First slide" style="height: 400px; object-fit: cover" />
     </div>
     <div class="carousel-item">
-      <img
-        src="media/watches/image2.jpg"
-        class="d-block w-100"
-        alt="Second slide"
-        style="height: 400px; object-fit: cover"
-      />
+      <img src="media/watches/image2.jpg" class="d-block w-100" alt="Second slide" style="height: 400px; object-fit: cover" />
     </div>
     <div class="carousel-item">
-      <img
-        src="media/watches/image3.jpg"
-        class="d-block w-100"
-        alt="Third slide"
-        style="height: 400px; object-fit: cover"
-      />
+      <img src="media/watches/image3.jpg" class="d-block w-100" alt="Third slide" style="height: 400px; object-fit: cover" />
     </div>
   </div>
-  <button
-    class="carousel-control-prev"
-    type="button"
-    data-bs-target="#carouselExampleRide"
-    data-bs-slide="prev"
-  >
+  <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleRide" data-bs-slide="prev">
     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
     <span class="visually-hidden">Previous</span>
   </button>
-  <button
-    class="carousel-control-next"
-    type="button"
-    data-bs-target="#carouselExampleRide"
-    data-bs-slide="next"
-  >
+  <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleRide" data-bs-slide="next">
     <span class="carousel-control-next-icon" aria-hidden="true"></span>
     <span class="visually-hidden">Next</span>
   </button>
 </div>
 
 <!-- Offer Section -->
-<div
-  style="
-    font-size: 24px;
-    font-weight: bold;
-    color: #ff6347;
-    text-align: center;
-    padding: 20px;
-    background-color: #f8f9fa;
-    border-radius: 10px;
-  "
->
-  Enjoy a <span style="color: #28a745">massive 50% discount</span> on every
-  order—don't miss out on this unbeatable offer!
+<div style="font-size: 24px; font-weight: bold; color: #ff6347; text-align: center; padding: 20px; background-color: #f8f9fa; border-radius: 10px">
+  Enjoy a <span style="color: #28a745">massive 50% discount</span> on every order—don't miss out on this unbeatable offer!
 </div>
 
 <!-- Card Section -->
-<div>{% include "watchlist.html" with watches=watches %}</div>
+<div class="container mt-5">
+  <h1>Our Watches</h1>
+  <div class="row">
+    {% for watch in watches %}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm">
+        <img
+          src="{{ watch.image.url }}"
+          class="card-img-top"
+          alt="{{ watch.brand }}"
+          style="height: 300px; width: 100%; object-fit: contain"
+          onclick="location.href='{% url 'watchdetail' watch.id %}'"
+        />
+        <div class="card-body">
+          <h5 class="card-title">{{ watch.brand }}</h5>
+          <p class="card-text">{{ watch.description }}</p>
+          <p class="card-text">Rs: {{ watch.price }}</p>
+          <p class="card-text">Only {{ watch.stock }} available</p>
+          <p class="card-text">Grab {{ watch.discount }} % discount</p>
 
+          <!-- Buttons Container -->
+          <div class="d-flex justify-content-between">
+            <form method="POST" action="{% url 'add_to_wishlist' watch.id %}">
+              {% csrf_token %} {% if watch.id in user_wishlist_items %}
+              <button class="btn btn-danger">Remove from Wishlist</button>
+              {% else %}
+              <button class="btn btn-outline-danger">Add to Wishlist</button>
+              {% endif %}
+            </form>
+            <form method="POST" action="{% url 'add_to_cart' watch.id %}" class="cart-form">
+              {% csrf_token %} {% if watch.id in user_cart_items %}
+              <a href="{% url 'cartlist' %}" class="btn btn-success">Go to Cart</a>
+              {% else %}
+              <button type="submit" class="btn btn-outline-success">Add to Cart</button>
+              {% endif %}
+            </form>
+          </div>
+
+          <a href="{% url 'watchdetail' watch.id %}" class="btn btn-primary mt-3">View Details</a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
 <!-- Footer Section -->
-<footer
-  style="
-    background-color: #343a40;
-    padding: 10px 0;
-    color: #ffffff;
-    text-align: center;
-  "
->
+<footer style="background-color: #343a40; padding: 10px 0; color: #ffffff; text-align: center">
   <div style="max-width: 1200px; margin: 0 auto">
-    <p style="font-size: 18px; margin-bottom: 7px">
-      &copy; 2024 Your Company Name. All rights reserved.
-    </p>
+    <p style="font-size: 18px; margin-bottom: 7px">&copy; 2024 Your Company Name. All rights reserved.</p>
     <div style="margin-bottom: 7px">
-      <a href="#" style="color: #f8f9fa; margin: 0 10px; text-decoration: none"
-        >Contact</a
-      >
-      <a href="#" style="color: #f8f9fa; margin: 0 10px; text-decoration: none"
-        >Privacy Policy</a
-      >
+      <a href="#" style="color: #f8f9fa; margin: 0 10px; text-decoration: none">Contact</a>
+      <a href="#" style="color: #f8f9fa; margin: 0 10px; text-decoration: none">Privacy Policy</a>
     </div>
     <div>
-      <a
-        href="https://www.facebook.com"
-        style="color: #f8f9fa; margin-right: 10px"
-      >
+      <a href="https://www.facebook.com" style="color: #f8f9fa; margin-right: 10px">
         <i class="fab fa-facebook" style="font-size: 24px"></i>
       </a>
-      <a
-        href="https://www.twitter.com"
-        style="color: #f8f9fa; margin-right: 10px"
-      >
+      <a href="https://www.twitter.com" style="color: #f8f9fa; margin-right: 10px">
         <i class="fab fa-twitter" style="font-size: 24px"></i>
       </a>
-      <a
-        href="https://www.instagram.com"
-        style="color: #f8f9fa; margin-right: 10px"
-      >
+      <a href="https://www.instagram.com" style="color: #f8f9fa; margin-right: 10px">
         <i class="fab fa-instagram" style="font-size: 24px"></i>
       </a>
       <a href="https://www.linkedin.com" style="color: #f8f9fa">

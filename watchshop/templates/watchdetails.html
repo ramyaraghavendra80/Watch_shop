@@ -7,7 +7,7 @@
         src="{{ watch_detail.image.url }}"
         class="img-fluid rounded shadow"
         alt="{{ watch_detail.brand }}"
-        style="max-height: 400px; width: 100%; object-fit: cover; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1)"
+        style="max-height: 400px; width: 100%; object-fit: contain; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1)"
       />
     </div>
 
@@ -19,7 +19,19 @@
       {% if watch_detail.discount %}
       <p style="font-size: 1.2rem; color: #dc3545">Discount: {{ watch_detail.discount }}% off</p>
       {% endif %}
-      <a href="#" class="btn btn-success btn-lg mt-3" style="background-color: #28a745; border-color: #28a745; font-size: 1.2rem">Buy Now</a>
+
+      <!-- Buttons Section -->
+      <div class="d-flex justify-content-start mt-3">
+        <a href="{% url 'buy_now' watch_detail.id %}" class="btn btn-success btn-lg" style="background-color: #28a745; border-color: #28a745; font-size: 1.2rem; margin-right: 10px">Buy Now</a>
+
+        <form method="POST" action="{% url 'add_to_cart' watch_detail.id %}" class="me-2">
+          {% csrf_token %} {% if watch_detail.id in user_cart_items %}
+          <a href="{% url 'cartlist' %}" class="btn btn-success btn-lg"><i class="fas fa-shopping-cart"></i> Go to Cart</a>
+          {% else %}
+          <button type="submit" class="btn btn-outline-success btn-lg"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
+          {% endif %}
+        </form>
+      </div>
     </div>
   </div>
 

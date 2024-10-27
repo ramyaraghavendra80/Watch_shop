@@ -1,0 +1,53 @@
+{% extends "main.html" %} {% block content %}
+<div class="container mt-4" style="font-family: 'Poppins', sans-serif; padding: 20px; background-color: #f8f9fa; border-radius: 10px; box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1)">
+  <div class="row">
+    <!-- Watch Card Section -->
+    <div class="col-md-6">
+      <h1 style="color: #ff6347; font-size: 2.5rem">{{ watch_detail.brand }}</h1>
+      <img
+        src="{{ watch_detail.image.url }}"
+        class="img-fluid rounded shadow"
+        alt="{{ watch_detail.brand }}"
+        style="max-height: 400px; width: 100%; object-fit: contain; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1)"
+      />
+      <p style="font-family: 'Open Sans', sans-serif; font-size: 1.2rem; color: #6c757d">{{ watch_detail.description }}</p>
+      <p style="font-size: 1.5rem; font-weight: bold">Price: Rs {{ watch_detail.price }}</p>
+      {% if watch_detail.discount %}
+      <p style="font-size: 1.2rem; color: #dc3545">Discount: {{ watch_detail.discount }}% off</p>
+      {% endif %}
+    </div>
+
+    <!-- Payment Section -->
+    <div class="col-md-6">
+      <h1 class="text-center">Payment Options</h1>
+      <div class="mt-4">
+        <form method="POST" action="{% url 'payment_success' %}">
+          {% csrf_token %}
+          <div class="mb-4">
+            <label for="address" class="form-label">Delivery Address</label>
+            <textarea name="address" id="address" class="form-control" rows="3" required placeholder="Enter your delivery address"></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Choose Payment Method</label>
+            <div class="form-check">
+              <input type="radio" class="form-check-input" name="payment_method" id="upi" value="UPI" required />
+              <label class="form-check-label" for="upi">UPI</label>
+            </div>
+            <div class="form-check">
+              <input type="radio" class="form-check-input" name="payment_method" id="card" value="Card" />
+              <label class="form-check-label" for="card">Debit/Credit Card</label>
+            </div>
+            <div class="form-check">
+              <input type="radio" class="form-check-input" name="payment_method" id="cod" value="COD" />
+              <label class="form-check-label" for="cod">Cash on Delivery</label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100" style="background-color: #007bff; border-color: #007bff">Place Order</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -34,7 +34,7 @@ class Watchlist(models.Model):
     brand = models.CharField(max_length=255)
     description = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    image = models.ImageField(upload_to='static\watchshop_app\watches')
+    image = models.ImageField(upload_to='watches/')
     stock = models.IntegerField(default=0)
     available = models.BooleanField(default=True)
     discount = models.DecimalField(
@@ -45,7 +45,8 @@ class Watchlist(models.Model):
 
 
 class Wishlist(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL,
+                             on_delete=models.CASCADE)
     watch = models.ForeignKey(Watchlist, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -81,3 +82,4 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.watch.brand} ({self.rating} stars)"
+
