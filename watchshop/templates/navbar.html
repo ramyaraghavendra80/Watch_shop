@@ -78,7 +78,7 @@
   <body>
     <div class="navbar">
       <ul>
-        <li><a href="{% url 'home' %}">Watchshop</a></li>
+        <li><a href="{% url 'home' %}">Watch Gallaxy</a></li>
         <li><a href="{% url 'home' %}">Home</a></li>
         {% if user.is_authenticated %}
         <li><a href="{% url 'profile' %}">Profile</a></li>
@@ -88,10 +88,10 @@
         <li><a href="{% url 'signup' %}">SignUp</a></li>
         {% endif %}
         <li>
-          <a href="{% url 'wishlist_view' %}" title="Wishlist"><i class="fas fa-heart"></i></a>
+          <a href="{% url 'login' %}?next={% url 'wishlist_view' %}" title="Wishlist"><i class="fas fa-heart"></i></a>
         </li>
         <li>
-          <a href="{% url 'cartlist' %}" title="My Cart"><i class="fas fa-shopping-cart"></i></a>
+          <a href="{% url 'login' %}?next={% url 'cartlist' %}" title="My Cart"><i class="fas fa-shopping-cart"></i></a>
         </li>
       </ul>
 
@@ -124,7 +124,7 @@
                 searchResults.style.display = "block"; // Show container
                 data.forEach((item) => {
                   const link = document.createElement("a");
-                  link.href = `/watch/${item.id}/`;
+                  link.href = `{% url 'login' %}?next=/watch/${item.id}/`;
                   link.textContent = `${item.title} - $${item.price}`;
                   searchResults.appendChild(link);
                 });

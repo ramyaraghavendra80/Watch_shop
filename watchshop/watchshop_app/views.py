@@ -212,7 +212,7 @@ def add_to_wishlist(request, watch_id):
     if not created:
         wishlist_item.delete()
 
-    return redirect('home')
+    return redirect('home', watch_id=watch_id)
 
 
 # View wishlist
