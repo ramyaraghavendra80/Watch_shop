@@ -101,7 +101,7 @@ def login_view(request):
     return render(request, 'login.html', {'form': form})
 
 
-# @login_required
+@login_required
 def logout_view(request):
     logout(request)
     return redirect('home')
@@ -300,6 +300,7 @@ def payment_success(request):
     return render(request, 'paymentsuccess.html')
 
 
+@login_required
 def search_view(request):
     if request.method == 'GET':
         query = request.GET.get('q', '')

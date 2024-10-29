@@ -88,14 +88,22 @@
         <li><a href="{% url 'signup' %}">SignUp</a></li>
         {% endif %}
         <li>
+          {% if user.is_authenticated %}
+          <a href="{% url 'wishlist_view' %}" title="Wishlist"><i class="fas fa-heart"></i></a>
+          {% else %}
           <a href="{% url 'login' %}?next={% url 'wishlist_view' %}" title="Wishlist"><i class="fas fa-heart"></i></a>
+          {% endif %}
         </li>
         <li>
+          {% if user.is_authenticated %}
+          <a href="{% url 'cartlist' %}" title="My Cart"><i class="fas fa-shopping-cart"></i></a>
+          {% else %}
           <a href="{% url 'login' %}?next={% url 'cartlist' %}" title="My Cart"><i class="fas fa-shopping-cart"></i></a>
+          {% endif %}
         </li>
       </ul>
 
-      <div class="search-form">
+      <div class="search-form" data-authenticated="{{ user.is_authenticated|yesno:'true,false' }}">
         <input type="text" id="search-input" placeholder="Search..." aria-label="Search" />
         <div id="search-results"></div>
       </div>
@@ -111,20 +119,18 @@
       document.getElementById("search-input").addEventListener("input", function () {
         const query = this.value;
         const searchResults = document.getElementById("search-results");
+        const isAuthenticated = document.querySelector(".search-form").dataset.authenticated === "true";
 
         if (query.length > 2) {
           fetch(`/search/?q=${encodeURIComponent(query)}`)
-            .then((response) => {
-              if (!response.ok) throw new Error("Network response was not ok");
-              return response.json();
-            })
+            .then((response) => response.json())
             .then((data) => {
               searchResults.innerHTML = ""; // Clear previous results
               if (data.length > 0) {
                 searchResults.style.display = "block"; // Show container
                 data.forEach((item) => {
                   const link = document.createElement("a");
-                  link.href = `{% url 'login' %}?next=/watch/${item.id}/`;
+                  link.href = isAuthenticated ? `/watch/${item.id}/` : `{% url 'login' %}?next=/watch/${item.id}/`;
                   link.textContent = `${item.title} - $${item.price}`;
                   searchResults.appendChild(link);
                 });
